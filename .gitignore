@@ -1,0 +1,7 @@
+# System files
+.trash/
+.DS_Store
+
+# Agent files
+.claude/*.local.json
+

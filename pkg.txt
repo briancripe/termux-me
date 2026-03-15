@@ -1,0 +1,24 @@
+# Core tools
+git
+gh
+openssh
+curl
+wget
+jq
+fzf
+tmux
+nano
+neovim
+python
+
+# Shell
+zsh
+starship
+chezmoi
+
+# Termux integration
+termux-api
+
+# Zsh plugins
+zsh-syntax-highlighting
+zsh-autosuggestions

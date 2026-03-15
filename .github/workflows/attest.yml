@@ -1,0 +1,35 @@
+name: Attest setup files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - termux-me.sh
+      - justfile
+      - pkg.txt
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write      # required for OIDC token → Sigstore signing
+      contents: read
+      attestations: write  # required to store attestation in GitHub
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attest termux-me.sh
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: termux-me.sh
+
+      - name: Attest justfile
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: justfile
+
+      - name: Attest pkg.txt
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: pkg.txt

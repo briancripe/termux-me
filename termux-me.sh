@@ -18,7 +18,7 @@ AUTO=false
 
 # Install required packages for bootstrap
 pkg update -y && pkg upgrade -y
-pkg install -y git just
+pkg install -y git just fzf
 
 # Clone repo (public — no auth needed)
 git clone --depth=1 "https://github.com/${OWNER}/${REPO}.git" "$DEST"

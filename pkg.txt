@@ -18,7 +18,3 @@ chezmoi
 
 # Termux integration
 termux-api
-
-# Zsh plugins
-zsh-syntax-highlighting
-zsh-autosuggestions

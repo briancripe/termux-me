@@ -276,13 +276,15 @@ status:
         exit 0
     fi
     ok termux "v${TERMUX_VERSION}"
-    gh auth status &>/dev/null && ok github "$(gh api user --jq .login 2>/dev/null)" || miss github
     command -v zsh      &>/dev/null && ok zsh      "$(zsh --version)"          || miss zsh
     command -v starship &>/dev/null && ok starship "$(starship --version)"     || miss starship
     command -v chezmoi  &>/dev/null && ok chezmoi  "$(chezmoi --version)"      || miss chezmoi
+    command -v gh       &>/dev/null && ok gh       "$(gh --version | head -1)" || miss gh
     command -v node     &>/dev/null && ok node     "$(node --version)"         || miss node
     command -v claude   &>/dev/null && ok claude   "$(claude --version 2>&1)"  || miss claude
-    command -v gh       &>/dev/null && ok gh       "$(gh --version | head -1)" || miss gh
+    [ -f "{{home}}/.ssh/id_ed25519" ] \
+        && ok ssh-key   "$(ssh-keygen -lf {{home}}/.ssh/id_ed25519 | awk '{print $2}')" \
+        || miss ssh-key
     [ -d "{{vault_git}}" ] \
         && ok vault "{{vault_shared}}" \
         || printf "\033[33m[--]\033[0m  %-12s not cloned (run: just vault)\n" vault

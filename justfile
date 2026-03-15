@@ -21,6 +21,14 @@ vault_git     := home + "/.git-repos/" + vault_name + ".git"
 _check-termux:
     @[ -n "${TERMUX_VERSION:-}" ] || (echo "ERROR: Not running in Termux" && exit 1)
 
+_cleanup-gh-token:
+    #!/usr/bin/env bash
+    if gh auth status &>/dev/null; then
+        echo "==> Clearing gh token (setup complete, git will use SSH key)..."
+        gh auth logout --hostname github.com 2>/dev/null || true
+        echo "[OK] gh token cleared"
+    fi
+
 # Interactive menu (fzf TUI)
 [group('setup')]
 menu: _check-termux
@@ -64,7 +72,7 @@ update:
 
 # Full setup (all steps in order)
 [group('setup')]
-default: _check-termux packages storage github xdg-ssh dotfiles shell node claude vault
+default: _check-termux packages storage github xdg-ssh dotfiles shell node claude vault _cleanup-gh-token
     @echo ""
     @echo "Setup complete — run: exec zsh"
     @echo ""
@@ -97,10 +105,14 @@ github:
     if gh auth status &>/dev/null; then
         echo "[OK] GitHub authenticated as $(gh api user --jq .login)"
     else
-        echo "==> Authenticating with GitHub..."
+        export BROWSER="termux-open-url"
+        echo "==> A browser will open — paste the code shown below."
         gh auth login --web --git-protocol https
-        gh auth setup-git
+        git config --global credential.https://github.com.helper ''
+        git config --global --add credential.https://github.com.helper '!gh auth git-credential'
         echo "[OK] GitHub authenticated as $(gh api user --jq .login)"
+        echo "[INFO] Token stored in ~/.config/gh (no system keyring on Termux)."
+        echo "       Token will be cleared after setup — git uses SSH keys going forward."
     fi
 
 # Create XDG dirs, generate SSH key, register with GitHub

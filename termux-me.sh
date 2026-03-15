@@ -20,8 +20,20 @@ AUTO=false
 pkg update -y && pkg upgrade -y
 pkg install -y git just fzf
 
-# Clone repo (public — no auth needed)
-git clone --depth=1 "https://github.com/${OWNER}/${REPO}.git" "$DEST"
+# Clone or update repo (public — no auth needed)
+EXPECTED_URL="https://github.com/${OWNER}/${REPO}.git"
+
+if [ -d "$DEST/.git" ]; then
+    ACTUAL_URL=$(git -C "$DEST" remote get-url origin 2>/dev/null || true)
+    if [ "$ACTUAL_URL" != "$EXPECTED_URL" ]; then
+        echo "ERROR: $DEST exists but points to $ACTUAL_URL (expected $EXPECTED_URL)"
+        exit 1
+    fi
+    echo "==> Updating existing install..."
+    git -C "$DEST" pull --depth=1
+else
+    git clone --depth=1 "$EXPECTED_URL" "$DEST"
+fi
 
 # Launch
 cd "$DEST"

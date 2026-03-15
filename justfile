@@ -107,7 +107,7 @@ github:
     else
         export BROWSER="termux-open-url"
         echo "==> A browser will open — paste the code shown below."
-        gh auth login --web --git-protocol https
+        gh auth login --web --git-protocol https --scopes admin:public_key
         git config --global credential.https://github.com.helper ''
         git config --global --add credential.https://github.com.helper '!gh auth git-credential'
         echo "[OK] GitHub authenticated as $(gh api user --jq .login)"

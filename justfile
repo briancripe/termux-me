@@ -43,11 +43,11 @@ menu: _check-termux
         "storage  ·  Grant shared storage access" \
         "github   ·  Authenticate with GitHub" \
         "xdg-ssh  ·  XDG dirs + SSH key (auto-registers with GitHub)" \
-        "dotfiles ·  Apply chezmoi dotfiles" \
         "shell    ·  Set zsh as default shell" \
         "node     ·  Node LTS" \
         "claude   ·  Claude Code" \
         "vault    ·  Clone Obsidian vault" \
+        "dotfiles ·  Apply chezmoi dotfiles" \
         "update   ·  Pull latest setup scripts + reopen menu" \
         "status   ·  Show installation status" \
         | fzf \
@@ -71,7 +71,7 @@ update:
 
 # Full setup (all steps in order)
 [group('setup')]
-default: _check-termux packages storage github xdg-ssh dotfiles shell node claude vault _cleanup-gh-token
+default: _check-termux packages storage github xdg-ssh shell node claude vault dotfiles _cleanup-gh-token
     @echo ""
     @echo "Setup complete — run: exec zsh"
     @echo ""
@@ -173,9 +173,15 @@ dotfiles repo=chezmoi_repo:
     fi
 
     echo "==> Applying chezmoi from $REPO_URL ..."
-    chezmoi init --apply "$REPO_URL"
-    echo "[OK] chezmoi dotfiles applied"
-    echo "     Update later: chezmoi update"
+    if chezmoi init --apply "$REPO_URL"; then
+        echo "[OK] chezmoi dotfiles applied"
+        echo "     Update later: chezmoi update"
+    else
+        echo ""
+        echo "[WARN] chezmoi apply failed — setup will continue without dotfiles."
+        echo "       Fix your chezmoi repo and retry: chezmoi init --apply $REPO_URL"
+        echo "       Or debug with: chezmoi diff"
+    fi
 
 # Set zsh as default shell
 [group('setup')]

@@ -14,7 +14,6 @@ chezmoi_repo  := env_var_or_default("CHEZMOI_DOTFILES_REPO", "dotfiles")
 vault_name    := env_var_or_default("VAULT_NAME", vault_repo)
 home          := env_var("HOME")
 prefix        := env_var_or_default("PREFIX", "/data/data/com.termux/files/usr")
-fnm_bin       := home + "/.local/bin"
 vault_shared  := home + "/storage/shared/Documents/" + vault_name
 vault_git     := home + "/.git-repos/" + vault_name + ".git"
 
@@ -40,13 +39,13 @@ menu: _check-termux
 
     RECIPE=$(printf '%s\n' \
         "default  ·  Full setup — all steps with defaults" \
-        "packages ·  Core packages (git, zsh, starship, fnm, etc.)" \
+        "packages ·  Core packages (git, zsh, starship, etc.)" \
         "storage  ·  Grant shared storage access" \
         "github   ·  Authenticate with GitHub" \
         "xdg-ssh  ·  XDG dirs + SSH key (auto-registers with GitHub)" \
         "dotfiles ·  Apply chezmoi dotfiles" \
         "shell    ·  Set zsh as default shell" \
-        "node     ·  fnm + Node LTS" \
+        "node     ·  Node LTS" \
         "claude   ·  Claude Code" \
         "vault    ·  Clone Obsidian vault" \
         "update   ·  Pull latest setup scripts + reopen menu" \
@@ -184,37 +183,24 @@ shell:
     chsh -s zsh 2>/dev/null || true
     @echo "[OK] Default shell set to zsh"
 
-# Install fnm + Node LTS
+# Install Node LTS
 [group('setup')]
 node:
     #!/usr/bin/env bash
     set -euo pipefail
-    export PATH="{{fnm_bin}}:$PATH"
-
-    if ! command -v fnm &>/dev/null; then
-        echo "==> Installing fnm..."
-        curl -fsSL https://fnm.vercel.app/install | bash -s -- \
-            --install-dir "{{fnm_bin}}" \
-            --skip-shell
-        echo "[OK] fnm installed"
+    if command -v node &>/dev/null; then
+        echo "[OK] Node $(node --version) / npm $(npm --version) already installed"
     else
-        echo "[OK] fnm $(fnm --version) already installed"
+        echo "==> Installing Node LTS..."
+        pkg install -y nodejs-lts
+        echo "[OK] Node $(node --version) / npm $(npm --version)"
     fi
-
-    eval "$(fnm env --shell bash)"
-    echo "==> Installing Node LTS..."
-    fnm install --lts
-    fnm use lts-latest
-    fnm default lts-latest
-    echo "[OK] Node $(node --version) / npm $(npm --version)"
 
 # Install Claude Code
 [group('setup')]
 claude:
     #!/usr/bin/env bash
     set -euo pipefail
-    export PATH="{{fnm_bin}}:$PATH"
-    eval "$(fnm env --shell bash 2>/dev/null)" || true
     export TMPDIR="${TMPDIR:-/data/data/com.termux/files/usr/tmp}"
 
     echo "==> Installing @anthropic-ai/claude-code..."
@@ -288,7 +274,6 @@ status:
     command -v zsh      &>/dev/null && ok zsh      "$(zsh --version)"          || miss zsh
     command -v starship &>/dev/null && ok starship "$(starship --version)"     || miss starship
     command -v chezmoi  &>/dev/null && ok chezmoi  "$(chezmoi --version)"      || miss chezmoi
-    command -v fnm      &>/dev/null && ok fnm      "$(fnm --version)"          || miss fnm
     command -v node     &>/dev/null && ok node     "$(node --version)"         || miss node
     command -v claude   &>/dev/null && ok claude   "$(claude --version 2>&1)"  || miss claude
     command -v gh       &>/dev/null && ok gh       "$(gh --version | head -1)" || miss gh
